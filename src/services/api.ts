@@ -2,7 +2,7 @@
 import { toast } from "sonner";
 
 // API Base URL - Replace with your actual API endpoint
-const API_BASE_URL = "https://api.example.com";
+const API_BASE_URL = "http://localhost:8080";
 
 // Define types for the API responses
 export interface User {
