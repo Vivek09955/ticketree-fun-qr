@@ -12,7 +12,7 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event, compact = false }: EventCardProps) => {
-  const { id, title, description, date, time, location, price, imageUrl } = event;
+  const { id, title, description, date, time, location, price, image_url } = event;
   
   // Format the date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -26,13 +26,13 @@ const EventCard = ({ event, compact = false }: EventCardProps) => {
     <Card className="event-card h-full flex flex-col">
       <div className="relative overflow-hidden">
         <img 
-          src={imageUrl}
+          src={image_url}
           alt={title}
           className="event-card-img"
         />
         <div className="absolute top-3 right-3">
           <Badge variant="secondary" className="font-medium shadow-sm">
-            ${price.toFixed(2)}
+            ${Number(price).toFixed(2)}
           </Badge>
         </div>
       </div>

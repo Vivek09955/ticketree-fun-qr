@@ -18,7 +18,7 @@ const QRTicket = ({ ticket, className = "" }: QRTicketProps) => {
       try {
         // In a real app, you would use a proper QR code generator
         // For now, we'll use a placeholder service
-        const qrCodeData = encodeURIComponent(ticket.qrCodeData);
+        const qrCodeData = encodeURIComponent(ticket.qr_code_data);
         setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrCodeData}`);
       } catch (error) {
         console.error("Error generating QR code:", error);
@@ -26,7 +26,7 @@ const QRTicket = ({ ticket, className = "" }: QRTicketProps) => {
     };
     
     generateQR();
-  }, [ticket.qrCodeData]);
+  }, [ticket.qr_code_data]);
   
   if (!ticket.event) {
     return null;
@@ -90,8 +90,8 @@ const QRTicket = ({ ticket, className = "" }: QRTicketProps) => {
         </div>
       </CardContent>
       <CardFooter className="text-xs text-muted-foreground bg-primary/5 justify-between">
-        <span>Purchase Date: {new Date(ticket.purchaseDate).toLocaleDateString()}</span>
-        <span className="font-medium">${ticket.event.price.toFixed(2)}</span>
+        <span>Purchase Date: {new Date(ticket.purchase_date).toLocaleDateString()}</span>
+        <span className="font-medium">${Number(ticket.event.price).toFixed(2)}</span>
       </CardFooter>
     </Card>
   );
