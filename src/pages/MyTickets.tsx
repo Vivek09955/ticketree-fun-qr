@@ -12,12 +12,15 @@ import Loader from "@/components/ui/Loader";
 import { Button } from "@/components/ui/button";
 
 const MyTickets = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
+    // Wait for auth to load
+    if (authLoading) return;
+    
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
       navigate("/login");
@@ -36,7 +39,7 @@ const MyTickets = () => {
     };
 
     fetchTickets();
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   // Group tickets by upcoming and past events
   const currentDate = new Date();

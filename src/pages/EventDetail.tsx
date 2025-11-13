@@ -26,7 +26,7 @@ const EventDetail = () => {
       if (!id) return;
       
       try {
-        const data = await getEvent(Number(id));
+        const data = await getEvent(id);
         setEvent(data);
       } catch (error) {
         console.error("Error fetching event:", error);
@@ -120,7 +120,7 @@ const EventDetail = () => {
         <div className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden bg-accent">
           <div className="absolute inset-0 bg-black/30 z-10" />
           <img
-            src={event.imageUrl}
+            src={event.image_url}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -190,7 +190,7 @@ const EventDetail = () => {
                     </div>
                     <div className="flex items-center text-sm space-x-2">
                       <Users className="h-4 w-4 text-primary" />
-                      <span>{event.availableSeats} seats available</span>
+                      <span>{event.available_seats} seats available</span>
                     </div>
                   </div>
                   
