@@ -9,10 +9,12 @@ import { Event } from "@/services/api";
 interface EventCardProps {
   event: Event;
   compact?: boolean;
+  onBook?: (eventId: string) => void;
+  isBooking?: boolean;
 }
 
-const EventCard = ({ event, compact = false }: EventCardProps) => {
-  const { id, title, description, date, time, location, price, image_url } = event;
+const EventCard = ({ event, compact = false, onBook, isBooking = false }: EventCardProps) => {
+  const { id, title, description, date, time, location, price, image_url, available_seats } = event;
   
   // Format the date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
@@ -59,12 +61,29 @@ const EventCard = ({ event, compact = false }: EventCardProps) => {
         </div>
       </CardContent>
       
-      <CardFooter>
-        <Link to={`/events/${id}`} className="w-full">
-          <Button className="w-full" variant={compact ? "secondary" : "default"}>
-            View Details
-          </Button>
-        </Link>
+      <CardFooter className="flex gap-2">
+        {onBook ? (
+          <>
+            <Button 
+              className="flex-1" 
+              onClick={() => onBook(id)}
+              disabled={isBooking || available_seats === 0}
+            >
+              {available_seats === 0 ? "Sold Out" : isBooking ? "Booking..." : "Book Now"}
+            </Button>
+            <Link to={`/events/${id}`}>
+              <Button variant="outline">
+                Details
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <Link to={`/events/${id}`} className="w-full">
+            <Button className="w-full" variant={compact ? "secondary" : "default"}>
+              View Details
+            </Button>
+          </Link>
+        )}
       </CardFooter>
     </Card>
   );

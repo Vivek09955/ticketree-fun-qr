@@ -1,17 +1,21 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Calendar, Ticket, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/ui/EventCard";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { getEvents, Event } from "@/services/api";
+import { getEvents, purchaseTicket, Event } from "@/services/api";
 import Loader from "@/components/ui/Loader";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -27,6 +31,27 @@ const Index = () => {
 
     fetchEvents();
   }, []);
+
+  const handleBookTicket = async (eventId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("Please login to book tickets");
+      navigate("/login");
+      return;
+    }
+
+    setBookingId(eventId);
+    const ticket = await purchaseTicket(eventId);
+    setBookingId(null);
+
+    if (ticket) {
+      // Refresh events to update available seats
+      const updatedEvents = await getEvents();
+      setEvents(updatedEvents);
+      navigate("/my-tickets");
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -83,7 +108,11 @@ const Index = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events.slice(0, 3).map((event) => (
                   <div key={event.id} className="animate-scale-in">
-                    <EventCard event={event} />
+                    <EventCard 
+                      event={event}
+                      onBook={handleBookTicket}
+                      isBooking={bookingId === event.id}
+                    />
                   </div>
                 ))}
               </div>
