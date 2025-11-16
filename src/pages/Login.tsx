@@ -10,6 +10,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import Loader from "@/components/ui/Loader";
+import { loginSchema } from "@/lib/validations/auth";
+import { toast } from "sonner";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -23,7 +25,16 @@ const Login = () => {
     setIsSubmitting(true);
     
     try {
-      const success = await login(email, password);
+      // Validate inputs
+      const validation = loginSchema.safeParse({ email, password });
+      if (!validation.success) {
+        const error = validation.error.errors[0];
+        toast.error(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const success = await login(validation.data.email, validation.data.password);
       if (success) {
         navigate("/events");
       }

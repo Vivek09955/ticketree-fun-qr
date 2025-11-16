@@ -10,41 +10,43 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import Loader from "@/components/ui/Loader";
+import { registerSchema } from "@/lib/validations/auth";
+import { toast } from "sonner";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    if (password !== confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return false;
-    }
-    if (password.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-      return false;
-    }
-    setPasswordError("");
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    // Validate inputs
+    const validation = registerSchema.safeParse({ 
+      name, 
+      email, 
+      password, 
+      confirmPassword 
+    });
+    
+    if (!validation.success) {
+      const error = validation.error.errors[0];
+      toast.error(error.message);
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      const success = await register(name, email, password);
+      const success = await register(
+        validation.data.name, 
+        validation.data.email, 
+        validation.data.password
+      );
       if (success) {
         navigate("/events");
       }
@@ -118,9 +120,6 @@ const Register = () => {
                     required
                     disabled={isSubmitting}
                   />
-                  {passwordError && (
-                    <p className="text-sm text-destructive mt-1">{passwordError}</p>
-                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-4">
