@@ -106,50 +106,31 @@ export const purchaseTicket = async (eventId: string): Promise<Ticket | null> =>
       return null;
     }
 
-    // Check if event exists and has available seats
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', eventId)
-      .single();
+    // Use atomic database function to prevent race conditions
+    const { data, error } = await supabase.rpc('purchase_ticket', {
+      p_event_id: eventId,
+      p_user_id: user.id
+    });
 
-    if (eventError) throw eventError;
+    if (error) throw error;
+
+    const result = data?.[0];
     
-    if (!event) {
-      toast.error("Event not found");
+    if (!result?.success) {
+      toast.error(result?.message || "Failed to purchase ticket");
       return null;
     }
-
-    if (event.available_seats <= 0) {
-      toast.error("No seats available");
-      return null;
-    }
-
-    // Create ticket
-    const qrCodeData = `TICKET-${eventId}-${user.id}-${Date.now()}`;
-    
-    const { data: ticket, error: ticketError } = await supabase
-      .from('tickets')
-      .insert({
-        event_id: eventId,
-        user_id: user.id,
-        qr_code_data: qrCodeData,
-      })
-      .select()
-      .single();
-
-    if (ticketError) throw ticketError;
-
-    // Update available seats
-    const { error: updateError } = await supabase
-      .from('events')
-      .update({ available_seats: event.available_seats - 1 })
-      .eq('id', eventId);
-
-    if (updateError) throw updateError;
 
     toast.success("Ticket purchased successfully!");
-    return ticket;
+    
+    // Return ticket in expected format
+    return {
+      id: result.ticket_id,
+      event_id: eventId,
+      user_id: user.id,
+      qr_code_data: result.qr_code,
+      purchase_date: new Date().toISOString(),
+    };
   } catch (error) {
     handleApiError(error);
     return null;
