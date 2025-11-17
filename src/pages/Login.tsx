@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Loader from "@/components/ui/Loader";
 import { loginSchema } from "@/lib/validations/auth";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -36,7 +37,21 @@ const Login = () => {
       
       const success = await login(validation.data.email, validation.data.password);
       if (success) {
-        navigate("/events");
+        // Check user role and redirect accordingly
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (roleData?.role === 'admin') {
+            navigate("/admin");
+          } else {
+            navigate("/events");
+          }
+        }
       }
     } finally {
       setIsSubmitting(false);
