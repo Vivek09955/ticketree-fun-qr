@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Ticket, LogIn, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -47,12 +49,21 @@ const Navbar = () => {
           </Link>
           {isAuthenticated ? (
             <>
-              <Link 
-                to="/my-tickets" 
-                className="font-medium transition-colors hover:text-primary"
-              >
-                My Tickets
-              </Link>
+              {isAdmin ? (
+                <Link 
+                  to="/admin" 
+                  className="font-medium transition-colors hover:text-primary"
+                >
+                  Admin Dashboard
+                </Link>
+              ) : (
+                <Link 
+                  to="/my-tickets" 
+                  className="font-medium transition-colors hover:text-primary"
+                >
+                  My Tickets
+                </Link>
+              )}
               <Button variant="ghost" onClick={handleLogout}>
                 Logout
               </Button>
@@ -100,13 +111,23 @@ const Navbar = () => {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link 
-                  to="/my-tickets" 
-                  className="py-4 font-medium border-b border-border/50"
-                  onClick={closeMenu}
-                >
-                  My Tickets
-                </Link>
+                {isAdmin ? (
+                  <Link 
+                    to="/admin" 
+                    className="py-4 font-medium border-b border-border/50"
+                    onClick={closeMenu}
+                  >
+                    Admin Dashboard
+                  </Link>
+                ) : (
+                  <Link 
+                    to="/my-tickets" 
+                    className="py-4 font-medium border-b border-border/50"
+                    onClick={closeMenu}
+                  >
+                    My Tickets
+                  </Link>
+                )}
                 <button
                   className="py-4 font-medium text-left text-destructive"
                   onClick={handleLogout}
